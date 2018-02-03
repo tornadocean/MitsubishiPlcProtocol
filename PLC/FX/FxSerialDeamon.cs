@@ -21,8 +21,13 @@ namespace InControls.PLC.FX
 	{
 		private SerialPortSync _SerialPort;
 		private FxRingBuffer _RingBuffer;
+        private int nBaudrate = 0;
+        public int Baudrate
+        {
+            get { return nBaudrate; }
+        }
 
-		private const int MAX_RETRY_READ_COUNT = 50;
+        private const int MAX_RETRY_READ_COUNT = 50;
 
 		public FxSerialDeamon()
 			: this(ControllerTypeConst.ctPLC_Fx, 0, string.Empty, string.Empty, 0, 128)
@@ -60,8 +65,41 @@ namespace InControls.PLC.FX
 		/// </summary>
 		/// <returns>如果成功返回 true,否则返回 false</returns>
 		public bool Start(int portNo)
-		{
-			return Start(portNo, "115200,E,7,1");
+        {
+            string cmd;
+            FxCommandResponse res;
+
+            bool bOpen = Start(portNo, "9600,E,7,1");
+            nBaudrate = 9600;
+            if(bOpen)
+            {
+                cmd = FxCommandHelper.Make(FxCommandConst.FxCmdRead, new FxAddress("Y0", ControllerTypeConst.ctPLC_Fx), 2);
+                res = Send(0, cmd);
+                if(res.ResultCode != ResultCodeConst.rcSuccess)
+                {
+                    bOpen = false;
+                    _SerialPort.ClosePort();
+                }
+            }
+
+            if(false == bOpen)
+            {
+                bOpen = Start(portNo, "115200,E,7,1");
+                nBaudrate = 115200;
+                if(bOpen)
+                {
+                    cmd = FxCommandHelper.Make(FxCommandConst.FxCmdRead, new FxAddress("Y0", ControllerTypeConst.ctPLC_Fx), 2);
+                    res = Send(0, cmd);
+                    if (res.ResultCode != ResultCodeConst.rcSuccess)
+                    {
+                        bOpen = false;
+                        _SerialPort.ClosePort();
+                        nBaudrate = 0;
+                    }
+                }
+            }
+
+            return bOpen;
 			//return Start(portNo, "9600,E,7,1");
 		}
 
