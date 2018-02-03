@@ -121,7 +121,8 @@ namespace InControls.PLC.FX
 			StringBuilder sb = new StringBuilder(64);
 			sb.Append((char)FxControlCode._STX);
 			sb.Append((char)cmd);
-			sb.Append(addr.ToAddressHexString());
+            var sAddr = addr.ToAddressHexString();
+            sb.Append(sAddr);
 			if (length > 0) sb.Append(FxConvert.DecToHex((uint)length, 2));
 			sb.Append((char)FxControlCode._ETX);
 			sb.Append(FxConvert.DecToHex(GetCheckSum(sb.ToString(), 1), 2));

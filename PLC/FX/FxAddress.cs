@@ -76,7 +76,10 @@ namespace InControls.PLC.FX
 			case FxAddressType.T:
 				_AddressLayoutType = FxAddressLayoutType.AddressLayoutInt32;
 				break;
-			default:
+                case FxAddressType.D:
+                    _AddressLayoutType = FxAddressLayoutType.AddressLayoutInt16;
+                    break;
+                default:
 				_AddressLayoutType = FxAddressLayoutType.AddressLayoutBin;
 				break;
 			}
@@ -316,9 +319,9 @@ namespace InControls.PLC.FX
 		public string ToAddressHexString ()
 		{
 			uint addr = _UniformAddr;
-			if(_AddressLayoutType != FxAddressLayoutType.AddressLayoutBin) {
-				addr = ((_UniformAddr >> 8) & 0xff) | ((_UniformAddr & 0xff) << 8);
-			}
+			//if(_AddressLayoutType != FxAddressLayoutType.AddressLayoutBin) {
+			//	addr = ((_UniformAddr >> 8) & 0xff) | ((_UniformAddr & 0xff) << 8);
+			//}
 			return string.Format("{0:X4}", addr);
 		}
 
