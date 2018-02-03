@@ -63,13 +63,35 @@ namespace InControls.PLC.FX
 			return (result);
 		}
 
-		/// <summary>
-		/// 16进制串转换为对应的2进制描述格式
-		/// 例如输入 "1A"，则返回“00011010”
-		/// </summary>
-		/// <param name="s">待转换的16进制串</param>
-		/// <returns>返回的二进制描述串</returns>
-		public static string HexToBin (string hexString)
+        public static int HexToDecBig(byte[] data, int fromIndex, int bytes)
+        {
+            int nData = 0;
+            var buf = new byte[bytes / 2];
+            for(int i=0; i<buf.Length; i++)
+            {
+                var nVal = HexToDec(data[fromIndex + i * 2]) * 16 + HexToDec(data[fromIndex + i * 2 + 1]);
+                buf[i] = (byte)nVal;
+            }
+            if(buf.Length == 2)
+            {
+                nData = BitConverter.ToInt16(buf, 0);
+            }
+            else if(buf.Length == 4)
+            {
+                nData = BitConverter.ToInt32(buf, 0);
+            }
+            
+            
+            return (nData);
+        }
+
+        /// <summary>
+        /// 16进制串转换为对应的2进制描述格式
+        /// 例如输入 "1A"，则返回“00011010”
+        /// </summary>
+        /// <param name="s">待转换的16进制串</param>
+        /// <returns>返回的二进制描述串</returns>
+        public static string HexToBin (string hexString)
 		{
 			string result = string.Empty;
 
@@ -100,19 +122,64 @@ namespace InControls.PLC.FX
 				return sb.ToString();
 		}
 
-		/// <summary>
+        /// <summary>
 		/// 数值转换为16进制字符串
 		/// </summary>
 		/// <param name="v">数值</param>
 		/// <param name="width">返回的字符串的字符数</param>
 		/// <returns>对应的16进制串</returns>
-		public static string DecToHex (uint v, int width)
+		public static string DecToHex(uint v, int width)
+        {
+            string s = string.Empty;
+
+            s = string.Format("{0:X}", v);
+            if (width > s.Length)
+            {
+                string s0 = new string('0', width - s.Length);
+                s = s0 + s;
+            }
+
+            return (s);
+        }
+        /// <summary>
+        /// 数值转换为16进制字符串
+        /// </summary>
+        /// <param name="v">数值</param>
+        /// <param name="width">返回的字符串的字符数</param>
+        /// <returns>对应的16进制串</returns>
+        public static string DecToHexBigEnd (uint v, int width)
 		{
-			string s = string.Format("{0:X}", v);
-			if(width > s.Length) {
-				string s0 = new string('0', width - s.Length);
-				s = s0 + s;
-			}
+            string s = string.Empty;
+            width /= 2;
+            switch (width)
+            {
+                case 2:
+                    {
+                        var bytes = BitConverter.GetBytes((UInt16)v);
+                        var sb = BitConverter.ToString(bytes);
+                        s = sb.Replace("-", "");
+                    }
+                   
+                    break;
+                case 4:
+                    {
+                        var bytes = BitConverter.GetBytes((UInt32)v);
+                        var sb = BitConverter.ToString(bytes);
+                        s = sb.Replace("-", "");
+                    }
+                    break;
+                default:
+                    {
+                        s = string.Format("{0:X}", v);
+                        if (width > s.Length)
+                        {
+                            string s0 = new string('0', width - s.Length);
+                            s = s0 + s;
+                        }
+                    }
+                    break;
+            }
+
 			return (s);
 		}
 

@@ -57,11 +57,24 @@ namespace InControls.PLC.FX
 			if (data[startIndex] != FxControlCode._STX) return;
 
 			// 每次处理一个 4B 或 8B,对应着 ushort，uint
+            if(t.DataItemSize == 1)
+            {
+                for (int i = startIndex + 1; i < (data.Length - startIndex - t.DataItemHexStringSize); i += t.DataItemHexStringSize)
+                {
+                    int v = FxConvert.HexToDec(data, i, t.DataItemHexStringSize);
+                    value.Add(v);
+                }
+            }
+            else
+            {
+                for (int i = startIndex + 1; i < (data.Length - startIndex - t.DataItemHexStringSize); i += t.DataItemHexStringSize)
+                {
+                    int v = FxConvert.HexToDecBig(data, i, t.DataItemHexStringSize);
+                    value.Add(v);
+                }
+            }
 
-			for (int i = startIndex + 1; i < (data.Length - startIndex - t.DataItemHexStringSize); i += t.DataItemHexStringSize) {
-				int v = FxConvert.HexToDec(data, i, t.DataItemHexStringSize);
-				value.Add(v);
-			}
+			
 		}
 
 		/// <summary>
@@ -113,8 +126,8 @@ namespace InControls.PLC.FX
 			sb.Append((char)FxControlCode._ETX);
 			sb.Append(FxConvert.DecToHex(GetCheckSum(sb.ToString(), 1), 2));
 
-			return (sb.ToString());
-		}
+            return (sb.ToString());
+        }
 
 		/// <summary>
 		/// 构建PLC FX命令
@@ -177,7 +190,8 @@ namespace InControls.PLC.FX
 			StringBuilder sb = new StringBuilder(data.Count * t.DataItemHexStringSize);
 
 			for (int i = 0; i < data.Count; i++) {
-				sb.Append(FxConvert.DecToHex(data[i], t.DataItemHexStringSize));
+
+				sb.Append(FxConvert.DecToHexBigEnd(data[i], t.DataItemHexStringSize));
 			}
 			return (sb.ToString());
 		}
