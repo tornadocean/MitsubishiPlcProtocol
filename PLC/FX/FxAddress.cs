@@ -319,10 +319,18 @@ namespace InControls.PLC.FX
 		public string ToAddressHexString ()
 		{
 			uint addr = _UniformAddr;
-			//if(_AddressLayoutType != FxAddressLayoutType.AddressLayoutBin) {
-			//	addr = ((_UniformAddr >> 8) & 0xff) | ((_UniformAddr & 0xff) << 8);
-			//}
-			return string.Format("{0:X4}", addr);
+            switch(AddressType)
+            {
+                case FxAddressType.Y:
+                case FxAddressType.X:
+                case FxAddressType.M:
+                    if (_AddressLayoutType != FxAddressLayoutType.AddressLayoutBin)
+                    {
+                        addr = ((_UniformAddr >> 8) & 0xff) | ((_UniformAddr & 0xff) << 8);
+                    }
+                    break;
+            }
+            return string.Format("{0:X4}", addr);
 		}
 
 		public override bool Equals (object obj)
